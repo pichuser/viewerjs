@@ -10,7 +10,8 @@
     "no-restricted-properties": "off",
     "valid-jsdoc": ["error", {
       "requireReturn": false
-    }]
+    }],
+    "linebreak-style": "off"
   },
   "overrides": [
     {

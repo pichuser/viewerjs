@@ -250,6 +250,20 @@
         & + li {
           margin-left: 1px;
         }
+
+        &.viewer-with-text {
+          border-radius: 10px;
+          color: white;
+          font-size: 12px;
+          line-height: 24px;
+          overflow: visible;
+          padding: 0 10px;
+          width: auto;
+
+          span {
+            pointer-events: none;
+          }
+        }
       }
 
       & > .viewer-small {

@@ -245,6 +245,12 @@ class Viewer {
 
         item.setAttribute('role', 'button');
         addClass(item, `${NAMESPACE}-${name}`);
+        if (name === 'lenta') {
+          const text = document.createElement('span');
+          text.innerText = 'лента';
+          item.classList.add(`${NAMESPACE}-with-text`);
+          item.append(text);
+        }
 
         if (!isFunction(click)) {
           setData(item, DATA_ACTION, name);

@@ -63,6 +63,7 @@ export const REGEXP_SPACES = /\s\s*/;
 
 // Misc
 export const BUTTONS = [
+  'lenta',
   'zoom-in',
   'zoom-out',
   'one-to-one',

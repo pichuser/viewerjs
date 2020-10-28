@@ -69,6 +69,10 @@ export default {
         this.zoom(0.1, true);
         break;
 
+      case 'lenta':
+        alert('show lenta');
+        break;
+
       case 'zoom-out':
         this.zoom(-0.1, true);
         break;
