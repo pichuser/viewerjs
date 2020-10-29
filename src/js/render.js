@@ -161,7 +161,9 @@ export default {
   },
 
   initImage(done) {
-    const { options, image, viewerData } = this;
+    const {
+      options, image, viewerData, lentaMode,
+    } = this;
     const footerHeight = this.footer.offsetHeight;
     const viewerWidth = viewerData.width;
     const viewerHeight = Math.max(viewerData.height - footerHeight, footerHeight);
@@ -195,8 +197,8 @@ export default {
         naturalHeight,
         aspectRatio,
         ratio: width / naturalWidth,
-        width,
-        height,
+        width: lentaMode ? naturalWidth : width,
+        height: lentaMode ? naturalHeight : height,
         left: (viewerWidth - width) / 2,
         top: (viewerHeight - height) / 2,
       };
@@ -224,7 +226,8 @@ export default {
   },
 
   renderImage(done) {
-    const { image, imageData } = this;
+    const { image, imageData, lentaMode } = this;
+    const ignoreMargin = lentaMode;
 
     setStyle(image, assign({
       width: imageData.width,
@@ -233,7 +236,7 @@ export default {
       // XXX: Not to use translateX/Y to avoid image shaking when zooming
       marginLeft: imageData.left,
       marginTop: imageData.top,
-    }, getTransforms(imageData)));
+    }, getTransforms(imageData), ignoreMargin));
 
     if (done) {
       if ((this.viewing || this.zooming) && this.options.transition) {

@@ -141,6 +141,16 @@
       max-width: 90% !important;
       width: auto;
     }
+
+    &.lenta {
+      display: flex;
+      overflow: visible;
+
+      & > img {
+        flex-shrink: 0;
+        margin-right: 5px;
+      }
+    }
   }
 
   &-footer {

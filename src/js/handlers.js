@@ -33,7 +33,7 @@ import {
 export default {
   click(event) {
     const { target } = event;
-    const { options, imageData } = this;
+    const { options, imageData, canvas } = this;
     const action = getData(target, DATA_ACTION);
 
     // Cancel the emulated click when the native click event was triggered.
@@ -70,6 +70,10 @@ export default {
         break;
 
       case 'lenta':
+        this.lentaMode = true;
+        this.hide(true);
+        this.view(0);
+        canvas.classList.add('lenta');
         alert('show lenta');
         break;
 
@@ -145,6 +149,7 @@ export default {
       image,
       index,
       viewerData,
+      lentaMode,
     } = this;
 
     removeClass(image, CLASS_INVISIBLE);
@@ -153,14 +158,16 @@ export default {
       removeClass(this.canvas, CLASS_LOADING);
     }
 
-    image.style.cssText = (
-      'height:0;'
-      + `margin-left:${viewerData.width / 2}px;`
-      + `margin-top:${viewerData.height / 2}px;`
-      + 'max-width:none!important;'
-      + 'position:absolute;'
-      + 'width:0;'
-    );
+    if (!lentaMode) {
+      image.style.cssText = (
+        'height:0;'
+        + `margin-left:${viewerData.width / 2}px;`
+        + `margin-top:${viewerData.height / 2}px;`
+        + 'max-width:none!important;'
+        + 'position:absolute;'
+        + 'width:0;'
+      );
+    }
 
     this.initImage(() => {
       toggleClass(image, CLASS_MOVE, options.movable);
@@ -170,6 +177,9 @@ export default {
         this.viewed = true;
         this.viewing = false;
 
+        if (lentaMode) {
+          return;
+        }
         if (isFunction(options.viewed)) {
           addListener(element, EVENT_VIEWED, options.viewed, {
             once: true,
@@ -510,7 +520,6 @@ export default {
     } else if (event.detail) {
       delta = event.detail > 0 ? 1 : -1;
     }
-
     this.zoom(-delta * ratio, true, event);
   },
 };

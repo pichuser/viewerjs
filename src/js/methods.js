@@ -40,6 +40,7 @@ import {
   removeListener,
   setStyle,
   toggleClass,
+  updateTransform,
 } from './utilities';
 
 export default {
@@ -223,112 +224,126 @@ export default {
       options,
       title,
       canvas,
+      lentaMode,
     } = this;
-    const item = this.items[index];
-    const img = item.querySelector('img');
-    const url = getData(img, 'originalUrl');
-    const alt = img.getAttribute('alt');
-    const image = document.createElement('img');
+    const cb = (item) => {
+      const img = item.querySelector('img');
+      const url = getData(img, 'originalUrl');
+      const alt = img.getAttribute('alt');
+      const image = document.createElement('img');
 
-    forEach(options.inheritedAttributes, (name) => {
-      const value = img.getAttribute(name);
+      forEach(options.inheritedAttributes, (name) => {
+        const value = img.getAttribute(name);
 
-      if (value !== null) {
-        image.setAttribute(name, value);
-      }
-    });
-
-    image.src = url;
-    image.alt = alt;
-
-    if (isFunction(options.view)) {
-      addListener(element, EVENT_VIEW, options.view, {
-        once: true,
-      });
-    }
-
-    if (dispatchEvent(element, EVENT_VIEW, {
-      originalImage: this.images[index],
-      index,
-      image,
-    }) === false || !this.isShown || this.hiding || this.played) {
-      return this;
-    }
-
-    this.image = image;
-    removeClass(this.items[this.index], CLASS_ACTIVE);
-    addClass(item, CLASS_ACTIVE);
-    this.viewed = false;
-    this.index = index;
-    this.imageData = {};
-    addClass(image, CLASS_INVISIBLE);
-
-    if (options.loading) {
-      addClass(canvas, CLASS_LOADING);
-    }
-
-    canvas.innerHTML = '';
-    canvas.appendChild(image);
-
-    // Center current item
-    this.renderList();
-
-    // Clear title
-    title.innerHTML = '';
-
-    // Generate title after viewed
-    const onViewed = () => {
-      const { imageData } = this;
-      const render = Array.isArray(options.title) ? options.title[1] : options.title;
-
-      title.innerHTML = escapeHTMLEntities(isFunction(render)
-        ? render.call(this, image, imageData)
-        : `${alt} (${imageData.naturalWidth} × ${imageData.naturalHeight})`);
-    };
-    let onLoad;
-
-    addListener(element, EVENT_VIEWED, onViewed, {
-      once: true,
-    });
-
-    this.viewing = {
-      abort: () => {
-        removeListener(element, EVENT_VIEWED, onViewed);
-
-        if (image.complete) {
-          if (this.imageRendering) {
-            this.imageRendering.abort();
-          } else if (this.imageInitializing) {
-            this.imageInitializing.abort();
-          }
-        } else {
-          // Cancel download to save bandwidth.
-          image.src = '';
-          removeListener(image, EVENT_LOAD, onLoad);
-
-          if (this.timeout) {
-            clearTimeout(this.timeout);
-          }
+        if (value !== null) {
+          image.setAttribute(name, value);
         }
-      },
-    };
+      });
 
-    if (image.complete) {
-      this.load();
-    } else {
-      addListener(image, EVENT_LOAD, onLoad = this.load.bind(this), {
+      image.src = url;
+      image.alt = alt;
+
+      if (isFunction(options.view)) {
+        addListener(element, EVENT_VIEW, options.view, {
+          once: true,
+        });
+      }
+
+      if (dispatchEvent(element, EVENT_VIEW, {
+        originalImage: this.images[index],
+        index,
+        image,
+      }) === false || !this.isShown || this.hiding || this.played) {
+        return this;
+      }
+
+      this.image = image;
+      removeClass(this.items[this.index], CLASS_ACTIVE);
+      addClass(item, CLASS_ACTIVE);
+      this.viewed = false;
+      this.index = index;
+      this.imageData = {};
+      if (!lentaMode) {
+        addClass(image, CLASS_INVISIBLE);
+      }
+
+      if (options.loading) {
+        addClass(canvas, CLASS_LOADING);
+      }
+
+      if (!lentaMode) {
+        canvas.innerHTML = '';
+      }
+      canvas.appendChild(image);
+
+      // Center current item
+      this.renderList();
+
+      // Clear title
+      title.innerHTML = '';
+
+      // Generate title after viewed
+      const onViewed = () => {
+        const { imageData } = this;
+        const render = Array.isArray(options.title) ? options.title[1] : options.title;
+
+        title.innerHTML = escapeHTMLEntities(isFunction(render)
+          ? render.call(this, image, imageData)
+          : `${alt} (${imageData.naturalWidth} × ${imageData.naturalHeight})`);
+      };
+      let onLoad;
+
+      addListener(element, EVENT_VIEWED, onViewed, {
         once: true,
       });
 
-      if (this.timeout) {
-        clearTimeout(this.timeout);
+      if (!lentaMode) {
+        this.viewing = {
+          abort: () => {
+            removeListener(element, EVENT_VIEWED, onViewed);
+
+            if (image.complete) {
+              if (this.imageRendering) {
+                this.imageRendering.abort();
+              } else if (this.imageInitializing) {
+                this.imageInitializing.abort();
+              }
+            } else {
+              // Cancel download to save bandwidth.
+              image.src = '';
+              removeListener(image, EVENT_LOAD, onLoad);
+
+              if (this.timeout) {
+                clearTimeout(this.timeout);
+              }
+            }
+          },
+        };
       }
 
-      // Make the image visible if it fails to load within 1s
-      this.timeout = setTimeout(() => {
-        removeClass(image, CLASS_INVISIBLE);
-        this.timeout = false;
-      }, 1000);
+      if (image.complete) {
+        this.load();
+      } else {
+        addListener(image, EVENT_LOAD, onLoad = this.load.bind(this), {
+          once: true,
+        });
+
+        if (this.timeout) {
+          clearTimeout(this.timeout);
+        }
+
+        // Make the image visible if it fails to load within 1s
+        this.timeout = setTimeout(() => {
+          removeClass(image, CLASS_INVISIBLE);
+          this.timeout = false;
+        }, 1000);
+      }
+      return null;
+    };
+    if (lentaMode) {
+      this.items.forEach(cb);
+    } else {
+      cb(this.items[index]);
     }
 
     return this;
@@ -376,8 +391,29 @@ export default {
    * @returns {Viewer} this
    */
   move(offsetX, offsetY) {
-    const { imageData } = this;
+    const {
+      imageData,
+      canvas,
+      lentaMode,
+    } = this;
 
+    if (lentaMode) {
+      if (!canvas.translateX) {
+        canvas.translateX = 1;
+      } else {
+        canvas.translateX += Number(offsetX);
+      }
+      if (!canvas.translateY) {
+        canvas.translateY = 1;
+      } else {
+        canvas.translateY += Number(offsetY);
+      }
+      const newTransform = {
+        translateX: `${canvas.translateX}px`,
+        translateY: `${canvas.translateY}px`,
+      };
+      canvas.style.transform = updateTransform(canvas.style.transform, newTransform);
+    }
     this.moveTo(
       isUndefined(offsetX) ? offsetX : imageData.left + Number(offsetX),
       isUndefined(offsetY) ? offsetY : imageData.top + Number(offsetY),
@@ -456,6 +492,8 @@ export default {
       options,
       pointers,
       imageData,
+      canvas,
+      lentaMode,
     } = this;
     const {
       width,
@@ -467,6 +505,10 @@ export default {
     } = imageData;
 
     ratio = Math.max(0, ratio);
+    if (lentaMode) {
+      const newScale = { scale: ratio };
+      canvas.style.transform = updateTransform(canvas.style.transform, newScale);
+    }
 
     if (isNumber(ratio) && this.viewed && !this.played && (_zoomable || options.zoomable)) {
       if (!_zoomable) {

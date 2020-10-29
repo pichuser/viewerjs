@@ -56,6 +56,7 @@ class Viewer {
     this.element = element;
     this.options = assign({}, DEFAULTS, isPlainObject(options) && options);
     this.action = false;
+    this.lentaMode = false;
     this.fading = false;
     this.fulled = false;
     this.hiding = false;

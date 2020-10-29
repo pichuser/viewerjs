@@ -127,20 +127,24 @@ export const assign = Object.assign || function assign(obj, ...args) {
 };
 
 const REGEXP_SUFFIX = /^(?:width|height|left|top|marginLeft|marginTop)$/;
+const REGEXP_IGNORE = /^(?:marginLeft|marginTop)$/;
 
 /**
  * Apply styles to the given element.
  * @param {Element} element - The target element.
  * @param {Object} styles - The styles for applying.
+ * @param {boolean} ignoreMargin kjkj
  */
-export function setStyle(element, styles) {
+export function setStyle(element, styles, ignoreMargin = false) {
   const { style } = element;
 
   forEach(styles, (value, property) => {
+    if (ignoreMargin && REGEXP_IGNORE.test(property)) {
+      return;
+    }
     if (REGEXP_SUFFIX.test(property) && isNumber(value)) {
       value += 'px';
     }
-
     style[property] = value;
   });
 }
@@ -674,4 +678,20 @@ export function getPointersCenter(pointers) {
     pageX,
     pageY,
   };
+}
+
+export function updateTransform(prevTransform, updateObj) {
+  const prevStyles = (prevTransform || '').split(' ').filter((p) => p).reduce((prev, cur) => {
+    const [, propName, value] = /(.*)\((.*)\)/.exec(cur);
+    prev[propName] = value;
+    return prev;
+  }, {});
+  const newObj = {
+    ...prevStyles,
+    ...updateObj,
+  };
+  return Object.keys(newObj).reduce((prev, curKey) => {
+    prev += `${curKey}(${newObj[curKey]})`;
+    return prev;
+  }, '');
 }
