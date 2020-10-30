@@ -2,6 +2,7 @@ import {
   ACTION_MOVE,
   ACTION_SWITCH,
   ACTION_ZOOM,
+  CLASS_FADE,
   CLASS_INVISIBLE,
   CLASS_LOADING,
   CLASS_MOVE,
@@ -58,7 +59,8 @@ export default {
       case 'lenta':
         this.hide(true);
         this.lentaMode = true;
-        canvas.classList.add('lenta');
+        addClass(canvas, 'lenta');
+        removeClass(canvas, CLASS_FADE);
         this.view(0);
         break;
 

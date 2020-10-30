@@ -505,8 +505,12 @@ export default {
 
     ratio = Math.max(0, ratio);
     if (lentaMode) {
-      const newScale = { scale: ratio };
+      const newScale = {
+        scale: ratio,
+        translateX: `${canvas.translateX * ratio}px`,
+      };
       canvas.style.transform = updateTransform(canvas.style.transform, newScale);
+      canvas.scale = ratio;
     }
 
     if (isNumber(ratio) && this.viewed && !this.played && (_zoomable || options.zoomable)) {
@@ -580,10 +584,10 @@ export default {
             cancelable: false,
           });
         });
-      }
 
-      if (hasTooltip) {
-        this.tooltip();
+        if (hasTooltip) {
+          this.tooltip();
+        }
       }
     }
 
@@ -887,7 +891,12 @@ export default {
 
   // Show the current ratio of the image with percentage
   tooltip() {
-    const { options, tooltipBox, imageData } = this;
+    const {
+      options,
+      tooltipBox,
+      imageData,
+      lentaMode,
+    } = this;
 
     if (!this.viewed || this.played || !options.tooltip) {
       return this;
@@ -895,6 +904,9 @@ export default {
 
     tooltipBox.textContent = `${Math.round(imageData.ratio * 100)}%`;
 
+    if (lentaMode) {
+      return this;
+    }
     if (!this.tooltipping) {
       if (options.transition) {
         if (this.fading) {

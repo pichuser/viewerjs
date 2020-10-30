@@ -239,6 +239,10 @@ export default {
     }, getTransforms(imageData)), ignoreMargin);
 
     if (done) {
+      if (lentaMode) {
+        done();
+        return;
+      }
       if ((this.viewing || this.zooming) && this.options.transition) {
         const onTransitionEnd = () => {
           this.imageRendering = false;
