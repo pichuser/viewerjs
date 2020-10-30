@@ -5,7 +5,7 @@
  * Copyright 2015-present Chen Fengyuan
  * Released under the MIT license
  *
- * Date: 2020-09-29T13:45:20.981Z
+ * Date: 2020-10-30T15:18:57.144Z
  */
 
 function _typeof(obj) {
@@ -93,6 +93,62 @@ function _objectSpread2(target) {
   }
 
   return target;
+}
+
+function _slicedToArray(arr, i) {
+  return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
+}
+
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
+}
+
+function _iterableToArrayLimit(arr, i) {
+  if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
+  var _arr = [];
+  var _n = true;
+  var _d = false;
+  var _e = undefined;
+
+  try {
+    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+      _arr.push(_s.value);
+
+      if (i && _arr.length === i) break;
+    }
+  } catch (err) {
+    _d = true;
+    _e = err;
+  } finally {
+    try {
+      if (!_n && _i["return"] != null) _i["return"]();
+    } finally {
+      if (_d) throw _e;
+    }
+  }
+
+  return _arr;
+}
+
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(o);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+}
+
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+
+  for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
+
+  return arr2;
+}
+
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
 }
 
 var DEFAULTS = {
@@ -379,7 +435,7 @@ var DATA_ACTION = "".concat(NAMESPACE, "Action"); // RegExps
 
 var REGEXP_SPACES = /\s\s*/; // Misc
 
-var BUTTONS = ['zoom-in', 'zoom-out', 'one-to-one', 'reset', 'prev', 'play', 'next', 'rotate-left', 'rotate-right', 'flip-horizontal', 'flip-vertical'];
+var BUTTONS = ['lenta', 'zoom-in', 'zoom-out', 'one-to-one', 'reset', 'prev', 'play', 'next', 'rotate-left', 'rotate-right', 'flip-horizontal', 'flip-vertical'];
 
 /**
  * Check if the given value is a string.
@@ -505,15 +561,22 @@ var assign = Object.assign || function assign(obj) {
   return obj;
 };
 var REGEXP_SUFFIX = /^(?:width|height|left|top|marginLeft|marginTop)$/;
+var REGEXP_IGNORE = /^(?:marginLeft|marginTop|width|height)$/;
 /**
  * Apply styles to the given element.
  * @param {Element} element - The target element.
  * @param {Object} styles - The styles for applying.
+ * @param {boolean} ignoreMargin kjkj
  */
 
 function setStyle(element, styles) {
+  var ignoreMargin = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
   var style = element.style;
   forEach(styles, function (value, property) {
+    if (ignoreMargin && REGEXP_IGNORE.test(property)) {
+      return;
+    }
+
     if (REGEXP_SUFFIX.test(property) && isNumber(value)) {
       value += 'px';
     }
@@ -1006,6 +1069,26 @@ function getPointersCenter(pointers) {
     pageY: pageY
   };
 }
+function updateTransform(prevTransform, updateObj) {
+  var prevStyles = (prevTransform || '').split(' ').filter(function (p) {
+    return p;
+  }).reduce(function (prev, cur) {
+    var _$exec = /(.*)\((.*)\)/.exec(cur),
+        _$exec2 = _slicedToArray(_$exec, 3),
+        propName = _$exec2[1],
+        value = _$exec2[2];
+
+    prev[propName] = value;
+    return prev;
+  }, {});
+
+  var newObj = _objectSpread2(_objectSpread2({}, prevStyles), updateObj);
+
+  return Object.keys(newObj).reduce(function (prev, curKey) {
+    prev += "".concat(curKey, "(").concat(newObj[curKey], ")");
+    return prev;
+  }, '');
+}
 
 var render = {
   render: function render() {
@@ -1141,7 +1224,8 @@ var render = {
 
     var options = this.options,
         image = this.image,
-        viewerData = this.viewerData;
+        viewerData = this.viewerData,
+        lentaMode = this.lentaMode;
     var footerHeight = this.footer.offsetHeight;
     var viewerWidth = viewerData.width;
     var viewerHeight = Math.max(viewerData.height - footerHeight, footerHeight);
@@ -1171,8 +1255,8 @@ var render = {
         naturalHeight: naturalHeight,
         aspectRatio: aspectRatio,
         ratio: width / naturalWidth,
-        width: width,
-        height: height,
+        width: lentaMode ? naturalWidth : width,
+        height: lentaMode ? naturalHeight : height,
         left: (viewerWidth - width) / 2,
         top: (viewerHeight - height) / 2
       };
@@ -1202,16 +1286,23 @@ var render = {
     var _this3 = this;
 
     var image = this.image,
-        imageData = this.imageData;
+        imageData = this.imageData,
+        lentaMode = this.lentaMode;
+    var ignoreMargin = lentaMode;
     setStyle(image, assign({
       width: imageData.width,
       height: imageData.height,
       // XXX: Not to use translateX/Y to avoid image shaking when zooming
       marginLeft: imageData.left,
       marginTop: imageData.top
-    }, getTransforms(imageData)));
+    }, getTransforms(imageData)), ignoreMargin);
 
     if (done) {
+      if (lentaMode) {
+        done();
+        return;
+      }
+
       if ((this.viewing || this.zooming) && this.options.transition) {
         var onTransitionEnd = function onTransitionEnd() {
           _this3.imageRendering = false;
@@ -1301,7 +1392,8 @@ var handlers = {
   click: function click(event) {
     var target = event.target;
     var options = this.options,
-        imageData = this.imageData;
+        imageData = this.imageData,
+        canvas = this.canvas;
     var action = getData(target, DATA_ACTION); // Cancel the emulated click when the native click event was triggered.
 
     if (IS_TOUCH_DEVICE && event.isTrusted && target === this.canvas) {
@@ -1310,22 +1402,8 @@ var handlers = {
 
     switch (action) {
       case 'mix':
-        if (this.played) {
-          this.stop();
-        } else if (options.inline) {
-          if (this.fulled) {
-            this.exit();
-          } else {
-            this.full();
-          }
-        } else {
-          this.hide();
-        }
-
-        break;
-
       case 'hide':
-        this.hide();
+        this.hide(true);
         break;
 
       case 'view':
@@ -1334,6 +1412,14 @@ var handlers = {
 
       case 'zoom-in':
         this.zoom(0.1, true);
+        break;
+
+      case 'lenta':
+        this.hide(true);
+        this.lentaMode = true;
+        addClass(canvas, 'lenta');
+        removeClass(canvas, CLASS_FADE);
+        this.view(0);
         break;
 
       case 'zoom-out':
@@ -1407,14 +1493,18 @@ var handlers = {
         options = this.options,
         image = this.image,
         index = this.index,
-        viewerData = this.viewerData;
+        viewerData = this.viewerData,
+        lentaMode = this.lentaMode;
     removeClass(image, CLASS_INVISIBLE);
 
     if (options.loading) {
       removeClass(this.canvas, CLASS_LOADING);
     }
 
-    image.style.cssText = 'height:0;' + "margin-left:".concat(viewerData.width / 2, "px;") + "margin-top:".concat(viewerData.height / 2, "px;") + 'max-width:none!important;' + 'position:absolute;' + 'width:0;';
+    if (!lentaMode) {
+      image.style.cssText = 'height:0;' + "margin-left:".concat(viewerData.width / 2, "px;") + "margin-top:".concat(viewerData.height / 2, "px;") + 'max-width:none!important;' + 'position:absolute;' + 'width:0;';
+    }
+
     this.initImage(function () {
       toggleClass(image, CLASS_MOVE, options.movable);
       toggleClass(image, CLASS_TRANSITION, options.transition);
@@ -1422,6 +1512,10 @@ var handlers = {
       _this.renderImage(function () {
         _this.viewed = true;
         _this.viewing = false;
+
+        if (lentaMode) {
+          return;
+        }
 
         if (isFunction(options.viewed)) {
           addListener(element, EVENT_VIEWED, options.viewed, {
@@ -1920,103 +2014,121 @@ var methods = {
     var element = this.element,
         options = this.options,
         title = this.title,
-        canvas = this.canvas;
-    var item = this.items[index];
-    var img = item.querySelector('img');
-    var url = getData(img, 'originalUrl');
-    var alt = img.getAttribute('alt');
-    var image = document.createElement('img');
-    forEach(options.inheritedAttributes, function (name) {
-      var value = img.getAttribute(name);
-
-      if (value !== null) {
-        image.setAttribute(name, value);
-      }
-    });
-    image.src = url;
-    image.alt = alt;
-
-    if (isFunction(options.view)) {
-      addListener(element, EVENT_VIEW, options.view, {
-        once: true
-      });
-    }
-
-    if (dispatchEvent(element, EVENT_VIEW, {
-      originalImage: this.images[index],
-      index: index,
-      image: image
-    }) === false || !this.isShown || this.hiding || this.played) {
-      return this;
-    }
-
-    this.image = image;
-    removeClass(this.items[this.index], CLASS_ACTIVE);
-    addClass(item, CLASS_ACTIVE);
-    this.viewed = false;
-    this.index = index;
-    this.imageData = {};
-    addClass(image, CLASS_INVISIBLE);
-
-    if (options.loading) {
-      addClass(canvas, CLASS_LOADING);
-    }
-
+        canvas = this.canvas,
+        lentaMode = this.lentaMode;
     canvas.innerHTML = '';
-    canvas.appendChild(image); // Center current item
 
-    this.renderList(); // Clear title
+    var cb = function cb(item) {
+      var img = item.querySelector('img');
+      var url = getData(img, 'originalUrl');
+      var alt = img.getAttribute('alt');
+      var image = document.createElement('img');
+      forEach(options.inheritedAttributes, function (name) {
+        var value = img.getAttribute(name);
 
-    title.innerHTML = ''; // Generate title after viewed
-
-    var onViewed = function onViewed() {
-      var imageData = _this2.imageData;
-      var render = Array.isArray(options.title) ? options.title[1] : options.title;
-      title.innerHTML = escapeHTMLEntities(isFunction(render) ? render.call(_this2, image, imageData) : "".concat(alt, " (").concat(imageData.naturalWidth, " \xD7 ").concat(imageData.naturalHeight, ")"));
-    };
-
-    var onLoad;
-    addListener(element, EVENT_VIEWED, onViewed, {
-      once: true
-    });
-    this.viewing = {
-      abort: function abort() {
-        removeListener(element, EVENT_VIEWED, onViewed);
-
-        if (image.complete) {
-          if (_this2.imageRendering) {
-            _this2.imageRendering.abort();
-          } else if (_this2.imageInitializing) {
-            _this2.imageInitializing.abort();
-          }
-        } else {
-          // Cancel download to save bandwidth.
-          image.src = '';
-          removeListener(image, EVENT_LOAD, onLoad);
-
-          if (_this2.timeout) {
-            clearTimeout(_this2.timeout);
-          }
+        if (value !== null) {
+          image.setAttribute(name, value);
         }
-      }
-    };
+      });
+      image.src = url;
+      image.alt = alt;
 
-    if (image.complete) {
-      this.load();
-    } else {
-      addListener(image, EVENT_LOAD, onLoad = this.load.bind(this), {
+      if (isFunction(options.view)) {
+        addListener(element, EVENT_VIEW, options.view, {
+          once: true
+        });
+      }
+
+      if (dispatchEvent(element, EVENT_VIEW, {
+        originalImage: _this2.images[index],
+        index: index,
+        image: image
+      }) === false || !_this2.isShown || _this2.hiding || _this2.played) {
+        return _this2;
+      }
+
+      _this2.image = image;
+      removeClass(_this2.items[_this2.index], CLASS_ACTIVE);
+      addClass(item, CLASS_ACTIVE);
+      _this2.viewed = false;
+      _this2.index = index;
+      _this2.imageData = {};
+
+      if (!lentaMode) {
+        addClass(image, CLASS_INVISIBLE);
+      }
+
+      if (options.loading) {
+        addClass(canvas, CLASS_LOADING);
+      }
+
+      canvas.appendChild(image); // Center current item
+
+      _this2.renderList(); // Clear title
+
+
+      title.innerHTML = ''; // Generate title after viewed
+
+      var onViewed = function onViewed() {
+        var imageData = _this2.imageData;
+        var render = Array.isArray(options.title) ? options.title[1] : options.title;
+        title.innerHTML = escapeHTMLEntities(isFunction(render) ? render.call(_this2, image, imageData) : "".concat(alt, " (").concat(imageData.naturalWidth, " \xD7 ").concat(imageData.naturalHeight, ")"));
+      };
+
+      var onLoad;
+      addListener(element, EVENT_VIEWED, onViewed, {
         once: true
       });
 
-      if (this.timeout) {
-        clearTimeout(this.timeout);
-      } // Make the image visible if it fails to load within 1s
+      if (!lentaMode) {
+        _this2.viewing = {
+          abort: function abort() {
+            removeListener(element, EVENT_VIEWED, onViewed);
+
+            if (image.complete) {
+              if (_this2.imageRendering) {
+                _this2.imageRendering.abort();
+              } else if (_this2.imageInitializing) {
+                _this2.imageInitializing.abort();
+              }
+            } else {
+              // Cancel download to save bandwidth.
+              image.src = '';
+              removeListener(image, EVENT_LOAD, onLoad);
+
+              if (_this2.timeout) {
+                clearTimeout(_this2.timeout);
+              }
+            }
+          }
+        };
+      }
+
+      if (image.complete) {
+        _this2.load();
+      } else {
+        addListener(image, EVENT_LOAD, onLoad = _this2.load.bind(_this2), {
+          once: true
+        });
+
+        if (_this2.timeout) {
+          clearTimeout(_this2.timeout);
+        } // Make the image visible if it fails to load within 1s
 
 
-      this.timeout = setTimeout(function () {
-        removeClass(image, CLASS_INVISIBLE);
-        _this2.timeout = false;
-      }, 1000);
+        _this2.timeout = setTimeout(function () {
+          removeClass(image, CLASS_INVISIBLE);
+          _this2.timeout = false;
+        }, 1000);
+      }
+
+      return null;
+    };
+
+    if (lentaMode) {
+      this.items.forEach(cb);
+    } else {
+      cb(this.items[index]);
     }
 
     return this;
@@ -2066,7 +2178,31 @@ var methods = {
    * @returns {Viewer} this
    */
   move: function move(offsetX, offsetY) {
-    var imageData = this.imageData;
+    var imageData = this.imageData,
+        canvas = this.canvas,
+        lentaMode = this.lentaMode;
+
+    if (lentaMode) {
+      if (!canvas.translateX) {
+        canvas.translateX = 1;
+      } else {
+        canvas.translateX += Number(offsetX);
+      }
+
+      if (!canvas.translateY) {
+        canvas.translateY = 1;
+      } else {
+        canvas.translateY += Number(offsetY);
+      }
+
+      var newTransform = {
+        translateX: "".concat(canvas.translateX, "px"),
+        translateY: "".concat(canvas.translateY, "px")
+      };
+      canvas.style.transform = updateTransform(canvas.style.transform, newTransform);
+      return this;
+    }
+
     this.moveTo(isUndefined(offsetX) ? offsetX : imageData.left + Number(offsetX), isUndefined(offsetY) ? offsetY : imageData.top + Number(offsetY));
     return this;
   },
@@ -2149,7 +2285,9 @@ var methods = {
     var element = this.element,
         options = this.options,
         pointers = this.pointers,
-        imageData = this.imageData;
+        imageData = this.imageData,
+        canvas = this.canvas,
+        lentaMode = this.lentaMode;
     var width = imageData.width,
         height = imageData.height,
         left = imageData.left,
@@ -2157,6 +2295,15 @@ var methods = {
         naturalWidth = imageData.naturalWidth,
         naturalHeight = imageData.naturalHeight;
     ratio = Math.max(0, ratio);
+
+    if (lentaMode) {
+      var newScale = {
+        scale: ratio,
+        translateX: "".concat(canvas.translateX * ratio, "px")
+      };
+      canvas.style.transform = updateTransform(canvas.style.transform, newScale);
+      canvas.scale = ratio;
+    }
 
     if (isNumber(ratio) && this.viewed && !this.played && (_zoomable || options.zoomable)) {
       if (!_zoomable) {
@@ -2209,26 +2356,29 @@ var methods = {
       imageData.width = newWidth;
       imageData.height = newHeight;
       imageData.ratio = ratio;
-      this.renderImage(function () {
-        _this3.zooming = false;
 
-        if (isFunction(options.zoomed)) {
-          addListener(element, EVENT_ZOOMED, options.zoomed, {
-            once: true
+      if (!lentaMode) {
+        this.renderImage(function () {
+          _this3.zooming = false;
+
+          if (isFunction(options.zoomed)) {
+            addListener(element, EVENT_ZOOMED, options.zoomed, {
+              once: true
+            });
+          }
+
+          dispatchEvent(element, EVENT_ZOOMED, {
+            ratio: ratio,
+            oldRatio: oldRatio,
+            originalEvent: _originalEvent
+          }, {
+            cancelable: false
           });
-        }
-
-        dispatchEvent(element, EVENT_ZOOMED, {
-          ratio: ratio,
-          oldRatio: oldRatio,
-          originalEvent: _originalEvent
-        }, {
-          cancelable: false
         });
-      });
 
-      if (hasTooltip) {
-        this.tooltip();
+        if (hasTooltip) {
+          this.tooltip();
+        }
       }
     }
 
@@ -2530,13 +2680,18 @@ var methods = {
 
     var options = this.options,
         tooltipBox = this.tooltipBox,
-        imageData = this.imageData;
+        imageData = this.imageData,
+        lentaMode = this.lentaMode;
 
     if (!this.viewed || this.played || !options.tooltip) {
       return this;
     }
 
     tooltipBox.textContent = "".concat(Math.round(imageData.ratio * 100), "%");
+
+    if (lentaMode) {
+      return this;
+    }
 
     if (!this.tooltipping) {
       if (options.transition) {
@@ -2754,7 +2909,13 @@ var others = {
     body.style.paddingRight = "".concat(this.scrollbarWidth + (parseFloat(this.initialBodyComputedPaddingRight) || 0), "px");
   },
   close: function close() {
-    var body = this.body;
+    var body = this.body,
+        canvas = this.canvas;
+    canvas.classList.remove('lenta');
+    this.lentaMode = false;
+    canvas.style.transform = null;
+    canvas.translateX = 1;
+    canvas.translateY = 1;
     removeClass(body, CLASS_OPEN);
     body.style.paddingRight = this.initialBodyPaddingRight;
   },
@@ -2910,6 +3071,7 @@ var Viewer = /*#__PURE__*/function () {
     this.element = element;
     this.options = assign({}, DEFAULTS, isPlainObject(options) && options);
     this.action = false;
+    this.lentaMode = false;
     this.fading = false;
     this.fulled = false;
     this.hiding = false;
@@ -3068,9 +3230,9 @@ var Viewer = /*#__PURE__*/function () {
       if (options.toolbar) {
         var list = document.createElement('ul');
         var custom = isPlainObject(options.toolbar);
-        var zoomButtons = BUTTONS.slice(0, 3);
-        var rotateButtons = BUTTONS.slice(7, 9);
-        var scaleButtons = BUTTONS.slice(9);
+        var zoomButtons = BUTTONS.slice(1, 4);
+        var rotateButtons = BUTTONS.slice(8, 10);
+        var scaleButtons = BUTTONS.slice(10);
 
         if (!custom) {
           addClass(toolbar, getResponsiveClass(options.toolbar));
@@ -3090,6 +3252,13 @@ var Viewer = /*#__PURE__*/function () {
           var item = document.createElement('li');
           item.setAttribute('role', 'button');
           addClass(item, "".concat(NAMESPACE, "-").concat(name));
+
+          if (name === 'lenta') {
+            var text = document.createElement('span');
+            text.innerText = 'лента';
+            item.classList.add("".concat(NAMESPACE, "-with-text"));
+            item.appendChild(text);
+          }
 
           if (!isFunction(click)) {
             setData(item, DATA_ACTION, name);
