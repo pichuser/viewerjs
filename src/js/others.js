@@ -42,8 +42,12 @@ export default {
   },
 
   close() {
-    const { body } = this;
-
+    const { body, canvas } = this;
+    canvas.classList.remove('lenta');
+    this.lentaMode = false;
+    canvas.style.transform = null;
+    canvas.translateX = 1;
+    canvas.translateY = 1;
     removeClass(body, CLASS_OPEN);
     body.style.paddingRight = this.initialBodyPaddingRight;
   },

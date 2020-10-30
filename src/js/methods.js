@@ -226,6 +226,7 @@ export default {
       canvas,
       lentaMode,
     } = this;
+    canvas.innerHTML = '';
     const cb = (item) => {
       const img = item.querySelector('img');
       const url = getData(img, 'originalUrl');
@@ -271,9 +272,6 @@ export default {
         addClass(canvas, CLASS_LOADING);
       }
 
-      if (!lentaMode) {
-        canvas.innerHTML = '';
-      }
       canvas.appendChild(image);
 
       // Center current item
@@ -413,6 +411,7 @@ export default {
         translateY: `${canvas.translateY}px`,
       };
       canvas.style.transform = updateTransform(canvas.style.transform, newTransform);
+      return this;
     }
     this.moveTo(
       isUndefined(offsetX) ? offsetX : imageData.left + Number(offsetX),
@@ -563,23 +562,25 @@ export default {
       imageData.width = newWidth;
       imageData.height = newHeight;
       imageData.ratio = ratio;
-      this.renderImage(() => {
-        this.zooming = false;
+      if (!lentaMode) {
+        this.renderImage(() => {
+          this.zooming = false;
 
-        if (isFunction(options.zoomed)) {
-          addListener(element, EVENT_ZOOMED, options.zoomed, {
-            once: true,
+          if (isFunction(options.zoomed)) {
+            addListener(element, EVENT_ZOOMED, options.zoomed, {
+              once: true,
+            });
+          }
+
+          dispatchEvent(element, EVENT_ZOOMED, {
+            ratio,
+            oldRatio,
+            originalEvent: _originalEvent,
+          }, {
+            cancelable: false,
           });
-        }
-
-        dispatchEvent(element, EVENT_ZOOMED, {
-          ratio,
-          oldRatio,
-          originalEvent: _originalEvent,
-        }, {
-          cancelable: false,
         });
-      });
+      }
 
       if (hasTooltip) {
         this.tooltip();

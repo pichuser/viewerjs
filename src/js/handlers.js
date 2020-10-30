@@ -43,22 +43,8 @@ export default {
 
     switch (action) {
       case 'mix':
-        if (this.played) {
-          this.stop();
-        } else if (options.inline) {
-          if (this.fulled) {
-            this.exit();
-          } else {
-            this.full();
-          }
-        } else {
-          this.hide();
-        }
-
-        break;
-
       case 'hide':
-        this.hide();
+        this.hide(true);
         break;
 
       case 'view':
@@ -70,11 +56,10 @@ export default {
         break;
 
       case 'lenta':
-        this.lentaMode = true;
         this.hide(true);
-        this.view(0);
+        this.lentaMode = true;
         canvas.classList.add('lenta');
-        alert('show lenta');
+        this.view(0);
         break;
 
       case 'zoom-out':

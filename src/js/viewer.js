@@ -218,9 +218,9 @@ class Viewer {
     if (options.toolbar) {
       const list = document.createElement('ul');
       const custom = isPlainObject(options.toolbar);
-      const zoomButtons = BUTTONS.slice(0, 3);
-      const rotateButtons = BUTTONS.slice(7, 9);
-      const scaleButtons = BUTTONS.slice(9);
+      const zoomButtons = BUTTONS.slice(1, 4);
+      const rotateButtons = BUTTONS.slice(8, 10);
+      const scaleButtons = BUTTONS.slice(10);
 
       if (!custom) {
         addClass(toolbar, getResponsiveClass(options.toolbar));
@@ -250,7 +250,7 @@ class Viewer {
           const text = document.createElement('span');
           text.innerText = 'лента';
           item.classList.add(`${NAMESPACE}-with-text`);
-          item.append(text);
+          item.appendChild(text);
         }
 
         if (!isFunction(click)) {

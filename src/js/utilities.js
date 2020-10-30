@@ -127,7 +127,7 @@ export const assign = Object.assign || function assign(obj, ...args) {
 };
 
 const REGEXP_SUFFIX = /^(?:width|height|left|top|marginLeft|marginTop)$/;
-const REGEXP_IGNORE = /^(?:marginLeft|marginTop)$/;
+const REGEXP_IGNORE = /^(?:marginLeft|marginTop|width|height)$/;
 
 /**
  * Apply styles to the given element.

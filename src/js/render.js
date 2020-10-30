@@ -236,7 +236,7 @@ export default {
       // XXX: Not to use translateX/Y to avoid image shaking when zooming
       marginLeft: imageData.left,
       marginTop: imageData.top,
-    }, getTransforms(imageData), ignoreMargin));
+    }, getTransforms(imageData)), ignoreMargin);
 
     if (done) {
       if ((this.viewing || this.zooming) && this.options.transition) {
