@@ -5,7 +5,7 @@
  * Copyright 2015-present Chen Fengyuan
  * Released under the MIT license
  *
- * Date: 2020-10-30T15:18:57.144Z
+ * Date: 2020-11-02T06:12:29.926Z
  */
 
 function _typeof(obj) {
