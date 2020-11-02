@@ -5,7 +5,7 @@
  * Copyright 2015-present Chen Fengyuan
  * Released under the MIT license
  *
- * Date: 2020-11-02T06:12:29.926Z
+ * Date: 2020-11-02T10:23:15.430Z
  */
 
 'use strict';
@@ -2299,12 +2299,13 @@ var methods = {
     ratio = Math.max(0, ratio);
 
     if (lentaMode) {
+      canvas.scale = ratio;
+      canvas.translateX *= ratio;
       var newScale = {
-        scale: ratio,
-        translateX: "".concat(canvas.translateX * ratio, "px")
+        scale: canvas.scale,
+        translateX: "".concat(canvas.translateX, "px")
       };
       canvas.style.transform = updateTransform(canvas.style.transform, newScale);
-      canvas.scale = ratio;
     }
 
     if (isNumber(ratio) && this.viewed && !this.played && (_zoomable || options.zoomable)) {

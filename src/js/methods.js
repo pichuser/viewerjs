@@ -505,12 +505,13 @@ export default {
 
     ratio = Math.max(0, ratio);
     if (lentaMode) {
+      canvas.scale = ratio;
+      canvas.translateX *= ratio;
       const newScale = {
-        scale: ratio,
-        translateX: `${canvas.translateX * ratio}px`,
+        scale: canvas.scale,
+        translateX: `${canvas.translateX}px`,
       };
       canvas.style.transform = updateTransform(canvas.style.transform, newScale);
-      canvas.scale = ratio;
     }
 
     if (isNumber(ratio) && this.viewed && !this.played && (_zoomable || options.zoomable)) {
