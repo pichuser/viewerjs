@@ -1,5 +1,8 @@
 export default (
   '<div class="viewer-container" touch-action="none">'
+    + '<div class="viewer-mega-gallery">'
+      + '<div role="button" class="viewer-fixed viewer-button viewer-close js-close-mega-gallery"></div>'
+    + '</div>'
     + '<div class="viewer-canvas"></div>'
     + '<div class="viewer-footer">'
       + '<div class="viewer-title"></div>'
@@ -9,7 +12,7 @@ export default (
       + '</div>'
     + '</div>'
     + '<div class="viewer-tooltip"></div>'
-    + '<div role="button" class="viewer-button" data-viewer-action="mix"></div>'
+    + '<div role="button" class="viewer-button viewer-js-button" data-viewer-action="mix"></div>'
     + '<div class="viewer-player"></div>'
   + '</div>'
 );

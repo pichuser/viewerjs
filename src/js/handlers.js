@@ -2,6 +2,7 @@ import {
   ACTION_MOVE,
   ACTION_SWITCH,
   ACTION_ZOOM,
+  CLASS_HIDE,
   CLASS_INVISIBLE,
   CLASS_LOADING,
   CLASS_MOVE,
@@ -9,6 +10,7 @@ import {
   DATA_ACTION,
   EVENT_CLICK,
   EVENT_DBLCLICK,
+  EVENT_LENTA,
   EVENT_LOAD,
   EVENT_VIEWED,
   IS_TOUCH_DEVICE,
@@ -33,7 +35,7 @@ import {
 export default {
   click(event) {
     const { target } = event;
-    const { options, imageData } = this;
+    const { options, imageData, megaGallery } = this;
     const action = getData(target, DATA_ACTION);
 
     // Cancel the emulated click when the native click event was triggered.
@@ -59,6 +61,12 @@ export default {
 
       case 'hide':
         this.hide();
+        break;
+
+      case 'lenta':
+        this.lentaViewing = true;
+        dispatchEvent(megaGallery, EVENT_LENTA);
+        removeClass(megaGallery, CLASS_HIDE);
         break;
 
       case 'view':
@@ -479,7 +487,7 @@ export default {
   },
 
   wheel(event) {
-    if (!this.viewed) {
+    if (!this.viewed || this.lentaViewing) {
       return;
     }
 

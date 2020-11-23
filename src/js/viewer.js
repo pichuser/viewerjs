@@ -178,8 +178,10 @@ class Viewer {
     const title = viewer.querySelector(`.${NAMESPACE}-title`);
     const toolbar = viewer.querySelector(`.${NAMESPACE}-toolbar`);
     const navbar = viewer.querySelector(`.${NAMESPACE}-navbar`);
-    const button = viewer.querySelector(`.${NAMESPACE}-button`);
+    const button = viewer.querySelector(`.${NAMESPACE}-js-button`);
     const canvas = viewer.querySelector(`.${NAMESPACE}-canvas`);
+    const megaGallery = viewer.querySelector(`.${NAMESPACE}-mega-gallery`);
+    addClass(megaGallery, CLASS_HIDE);
 
     this.parent = parent;
     this.viewer = viewer;
@@ -188,6 +190,7 @@ class Viewer {
     this.navbar = navbar;
     this.button = button;
     this.canvas = canvas;
+    this.megaGallery = megaGallery;
     this.footer = viewer.querySelector(`.${NAMESPACE}-footer`);
     this.tooltipBox = viewer.querySelector(`.${NAMESPACE}-tooltip`);
     this.player = viewer.querySelector(`.${NAMESPACE}-player`);
@@ -217,9 +220,9 @@ class Viewer {
     if (options.toolbar) {
       const list = document.createElement('ul');
       const custom = isPlainObject(options.toolbar);
-      const zoomButtons = BUTTONS.slice(0, 3);
-      const rotateButtons = BUTTONS.slice(7, 9);
-      const scaleButtons = BUTTONS.slice(9);
+      const zoomButtons = BUTTONS.slice(1, 4);
+      const rotateButtons = BUTTONS.slice(8, 10);
+      const scaleButtons = BUTTONS.slice(10);
 
       if (!custom) {
         addClass(toolbar, getResponsiveClass(options.toolbar));
@@ -245,6 +248,12 @@ class Viewer {
 
         item.setAttribute('role', 'button');
         addClass(item, `${NAMESPACE}-${name}`);
+        if (name === 'lenta') {
+          const text = document.createElement('span');
+          text.innerText = 'лента';
+          item.classList.add(`${NAMESPACE}-with-text`);
+          item.appendChild(text);
+        }
 
         if (!isFunction(click)) {
           setData(item, DATA_ACTION, name);

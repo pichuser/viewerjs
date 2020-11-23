@@ -5,7 +5,7 @@
  * Copyright 2015-present Chen Fengyuan
  * Released under the MIT license
  *
- * Date: 2020-09-29T13:45:20.981Z
+ * Date: 2020-11-23T17:23:15.866Z
  */
 
 'use strict';
@@ -321,7 +321,7 @@ var DEFAULTS = {
   stop: null
 };
 
-var TEMPLATE = '<div class="viewer-container" touch-action="none">' + '<div class="viewer-canvas"></div>' + '<div class="viewer-footer">' + '<div class="viewer-title"></div>' + '<div class="viewer-toolbar"></div>' + '<div class="viewer-navbar">' + '<ul class="viewer-list"></ul>' + '</div>' + '</div>' + '<div class="viewer-tooltip"></div>' + '<div role="button" class="viewer-button" data-viewer-action="mix"></div>' + '<div class="viewer-player"></div>' + '</div>';
+var TEMPLATE = '<div class="viewer-container" touch-action="none">' + '<div class="viewer-mega-gallery">' + '<div role="button" class="viewer-fixed viewer-button viewer-close js-close-mega-gallery"></div>' + '</div>' + '<div class="viewer-canvas"></div>' + '<div class="viewer-footer">' + '<div class="viewer-title"></div>' + '<div class="viewer-toolbar"></div>' + '<div class="viewer-navbar">' + '<ul class="viewer-list"></ul>' + '</div>' + '</div>' + '<div class="viewer-tooltip"></div>' + '<div role="button" class="viewer-button viewer-js-button" data-viewer-action="mix"></div>' + '<div class="viewer-player"></div>' + '</div>';
 
 var IS_BROWSER = typeof window !== 'undefined' && typeof window.document !== 'undefined';
 var WINDOW = IS_BROWSER ? window : {};
@@ -375,13 +375,14 @@ var EVENT_WHEEL = 'wheel';
 var EVENT_ZOOM = 'zoom';
 var EVENT_ZOOMED = 'zoomed';
 var EVENT_PLAY = 'play';
-var EVENT_STOP = 'stop'; // Data keys
+var EVENT_STOP = 'stop';
+var EVENT_LENTA = 'lenta'; // Data keys
 
 var DATA_ACTION = "".concat(NAMESPACE, "Action"); // RegExps
 
 var REGEXP_SPACES = /\s\s*/; // Misc
 
-var BUTTONS = ['zoom-in', 'zoom-out', 'one-to-one', 'reset', 'prev', 'play', 'next', 'rotate-left', 'rotate-right', 'flip-horizontal', 'flip-vertical'];
+var BUTTONS = ['lenta', 'zoom-in', 'zoom-out', 'one-to-one', 'reset', 'prev', 'play', 'next', 'rotate-left', 'rotate-right', 'flip-horizontal', 'flip-vertical'];
 
 /**
  * Check if the given value is a string.
@@ -1250,9 +1251,12 @@ var render = {
 
 var events = {
   bind: function bind() {
+    var _this = this;
+
     var options = this.options,
         viewer = this.viewer,
-        canvas = this.canvas;
+        canvas = this.canvas,
+        megaGallery = this.megaGallery;
     var document = this.element.ownerDocument;
     addListener(viewer, EVENT_CLICK, this.onClick = this.click.bind(this));
     addListener(viewer, EVENT_DRAG_START, this.onDragStart = this.dragstart.bind(this));
@@ -1261,6 +1265,30 @@ var events = {
     addListener(document, EVENT_POINTER_UP, this.onPointerUp = this.pointerup.bind(this));
     addListener(document, EVENT_KEY_DOWN, this.onKeyDown = this.keydown.bind(this));
     addListener(window, EVENT_RESIZE, this.onResize = this.resize.bind(this));
+    var button = document.querySelector('.js-close-mega-gallery');
+    addListener(button, EVENT_CLICK, function () {
+      _this.lentaViewing = false;
+      addClass(megaGallery, CLASS_HIDE);
+    });
+    addListener(megaGallery, EVENT_LENTA, function () {
+      forEach(_this.images, function (image, index) {
+        var src = image.src;
+        var alt = image.alt || getImageNameFromURL(src);
+
+        var url = _this.getImageURL(image);
+
+        if (src || url) {
+          var img = document.createElement('img');
+          img.src = src || url;
+          img.alt = alt;
+          img.setAttribute('data-index', index);
+          img.setAttribute('data-original-url', url || src);
+          megaGallery.appendChild(img);
+        }
+      });
+    }, {
+      once: true
+    });
 
     if (options.zoomable && options.zoomOnWheel) {
       addListener(viewer, EVENT_WHEEL, this.onWheel = this.wheel.bind(this), {
@@ -1303,7 +1331,8 @@ var handlers = {
   click: function click(event) {
     var target = event.target;
     var options = this.options,
-        imageData = this.imageData;
+        imageData = this.imageData,
+        megaGallery = this.megaGallery;
     var action = getData(target, DATA_ACTION); // Cancel the emulated click when the native click event was triggered.
 
     if (IS_TOUCH_DEVICE && event.isTrusted && target === this.canvas) {
@@ -1328,6 +1357,12 @@ var handlers = {
 
       case 'hide':
         this.hide();
+        break;
+
+      case 'lenta':
+        this.lentaViewing = true;
+        dispatchEvent(megaGallery, EVENT_LENTA);
+        removeClass(megaGallery, CLASS_HIDE);
         break;
 
       case 'view':
@@ -1707,7 +1742,7 @@ var handlers = {
   wheel: function wheel(event) {
     var _this4 = this;
 
-    if (!this.viewed) {
+    if (!this.viewed || this.lentaViewing) {
       return;
     }
 
@@ -3035,8 +3070,10 @@ var Viewer = /*#__PURE__*/function () {
       var title = viewer.querySelector(".".concat(NAMESPACE, "-title"));
       var toolbar = viewer.querySelector(".".concat(NAMESPACE, "-toolbar"));
       var navbar = viewer.querySelector(".".concat(NAMESPACE, "-navbar"));
-      var button = viewer.querySelector(".".concat(NAMESPACE, "-button"));
+      var button = viewer.querySelector(".".concat(NAMESPACE, "-js-button"));
       var canvas = viewer.querySelector(".".concat(NAMESPACE, "-canvas"));
+      var megaGallery = viewer.querySelector(".".concat(NAMESPACE, "-mega-gallery"));
+      addClass(megaGallery, CLASS_HIDE);
       this.parent = parent;
       this.viewer = viewer;
       this.title = title;
@@ -3044,6 +3081,7 @@ var Viewer = /*#__PURE__*/function () {
       this.navbar = navbar;
       this.button = button;
       this.canvas = canvas;
+      this.megaGallery = megaGallery;
       this.footer = viewer.querySelector(".".concat(NAMESPACE, "-footer"));
       this.tooltipBox = viewer.querySelector(".".concat(NAMESPACE, "-tooltip"));
       this.player = viewer.querySelector(".".concat(NAMESPACE, "-player"));
@@ -3070,9 +3108,9 @@ var Viewer = /*#__PURE__*/function () {
       if (options.toolbar) {
         var list = document.createElement('ul');
         var custom = isPlainObject(options.toolbar);
-        var zoomButtons = BUTTONS.slice(0, 3);
-        var rotateButtons = BUTTONS.slice(7, 9);
-        var scaleButtons = BUTTONS.slice(9);
+        var zoomButtons = BUTTONS.slice(1, 4);
+        var rotateButtons = BUTTONS.slice(8, 10);
+        var scaleButtons = BUTTONS.slice(10);
 
         if (!custom) {
           addClass(toolbar, getResponsiveClass(options.toolbar));
@@ -3092,6 +3130,13 @@ var Viewer = /*#__PURE__*/function () {
           var item = document.createElement('li');
           item.setAttribute('role', 'button');
           addClass(item, "".concat(NAMESPACE, "-").concat(name));
+
+          if (name === 'lenta') {
+            var text = document.createElement('span');
+            text.innerText = 'лента';
+            item.classList.add("".concat(NAMESPACE, "-with-text"));
+            item.appendChild(text);
+          }
 
           if (!isFunction(click)) {
             setData(item, DATA_ACTION, name);
@@ -3212,3 +3257,4 @@ var Viewer = /*#__PURE__*/function () {
 assign(Viewer.prototype, render, events, handlers, methods, others);
 
 module.exports = Viewer;
+//# sourceMappingURL=viewer.common.js.map
