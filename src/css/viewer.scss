@@ -264,6 +264,14 @@
             pointer-events: none;
           }
         }
+
+        &.viewer-reset-btn {
+          bottom: 50px;
+          left: 50%;
+          list-style-type: none;
+          position: fixed;
+          z-index: 100;
+        }
       }
 
       & > .viewer-small {

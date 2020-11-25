@@ -261,6 +261,14 @@
   pointer-events: none;
 }
 
+.viewer-toolbar > ul > li.viewer-reset-btn {
+  bottom: 50px;
+  left: 50%;
+  list-style-type: none;
+  position: fixed;
+  z-index: 100;
+}
+
 .viewer-toolbar > ul > .viewer-small {
   height: 18px;
   margin-bottom: 3px;

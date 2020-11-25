@@ -14,9 +14,13 @@ import {
 import {
   addClass,
   addListener,
+  assign,
   forEach,
   getImageNameFromURL,
+  getTransforms,
+  removeClass,
   removeListener,
+  setStyle,
 } from './utilities';
 
 export default {
@@ -38,6 +42,17 @@ export default {
       this.lentaViewing = false;
       addClass(megaGallery, CLASS_HIDE);
     });
+    let zoomedImages = [];
+    const resetBtn = document.querySelector('.js-reset-btn');
+    addClass(resetBtn, CLASS_HIDE);
+    addListener(resetBtn, EVENT_CLICK, () => {
+      addClass(resetBtn, CLASS_HIDE);
+      zoomedImages.forEach((img) => {
+        img.ratio = 1;
+        setStyle(img, getTransforms({}));
+      });
+      zoomedImages = [];
+    });
     addListener(megaGallery, EVENT_LENTA, () => {
       forEach(this.images, (image, index) => {
         const { src } = image;
@@ -46,6 +61,31 @@ export default {
 
         if (src || url) {
           const img = document.createElement('img');
+          img.ratio = 1;
+
+          addListener(img, EVENT_WHEEL, (event) => {
+            if (!event.ctrlKey) {
+              return;
+            }
+            removeClass(resetBtn, CLASS_HIDE);
+            let delta = 0;
+            if (event.deltaY) {
+              delta = event.deltaY > 0 ? 1 : -1;
+            } else if (event.wheelDelta) {
+              delta = -event.wheelDelta / 120;
+            } else if (event.detail) {
+              delta = event.detail > 0 ? 1 : -1;
+            }
+            zoomedImages.push(img);
+            let scale = img.ratio * (1 + -delta * 0.1);
+            scale = scale < 1 ? 1 : scale;
+            img.ratio = scale;
+            setStyle(img, assign({
+            }, getTransforms({
+              scaleX: scale,
+              scaleY: scale,
+            })));
+          });
 
           img.src = src || url;
           img.alt = alt;

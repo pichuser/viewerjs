@@ -176,7 +176,7 @@ class Viewer {
 
     const viewer = template.querySelector(`.${NAMESPACE}-container`);
     const title = viewer.querySelector(`.${NAMESPACE}-title`);
-    const toolbar = viewer.querySelector(`.${NAMESPACE}-toolbar`);
+    const toolbar = viewer.querySelector(`.${NAMESPACE}-js-toolbar`);
     const navbar = viewer.querySelector(`.${NAMESPACE}-navbar`);
     const button = viewer.querySelector(`.${NAMESPACE}-js-button`);
     const canvas = viewer.querySelector(`.${NAMESPACE}-canvas`);

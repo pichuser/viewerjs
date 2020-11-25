@@ -5,7 +5,7 @@
  * Copyright 2015-present Chen Fengyuan
  * Released under the MIT license
  *
- * Date: 2020-11-23T17:35:41.038Z
+ * Date: 2020-11-25T17:42:07.816Z
  */
 
 function _typeof(obj) {
@@ -319,7 +319,7 @@ var DEFAULTS = {
   stop: null
 };
 
-var TEMPLATE = '<div class="viewer-container" touch-action="none">' + '<div class="viewer-mega-gallery">' + '<div role="button" class="viewer-fixed viewer-button viewer-close js-close-mega-gallery"></div>' + '</div>' + '<div class="viewer-canvas"></div>' + '<div class="viewer-footer">' + '<div class="viewer-title"></div>' + '<div class="viewer-toolbar"></div>' + '<div class="viewer-navbar">' + '<ul class="viewer-list"></ul>' + '</div>' + '</div>' + '<div class="viewer-tooltip"></div>' + '<div role="button" class="viewer-button viewer-js-button" data-viewer-action="mix"></div>' + '<div class="viewer-player"></div>' + '</div>';
+var TEMPLATE = '<div class="viewer-container" touch-action="none">' + '<div class="viewer-mega-gallery">' + '<div role="button" class="viewer-fixed viewer-button viewer-close js-close-mega-gallery"></div>' + '<div class="viewer-footer">' + '<div class="viewer-toolbar">' + '<ul>' + '<li class="viewer-with-text viewer-reset-btn js-reset-btn"><span>сбросить</span></li>' + '</ul>' + '</div>' + '</div>' + '</div>' + '<div class="viewer-canvas"></div>' + '<div class="viewer-footer">' + '<div class="viewer-title"></div>' + '<div class="viewer-js-toolbar viewer-toolbar"></div>' + '<div class="viewer-navbar">' + '<ul class="viewer-list"></ul>' + '</div>' + '</div>' + '<div class="viewer-tooltip"></div>' + '<div role="button" class="viewer-button viewer-js-button" data-viewer-action="mix"></div>' + '<div class="viewer-player"></div>' + '</div>';
 
 var IS_BROWSER = typeof window !== 'undefined' && typeof window.document !== 'undefined';
 var WINDOW = IS_BROWSER ? window : {};
@@ -1268,6 +1268,17 @@ var events = {
       _this.lentaViewing = false;
       addClass(megaGallery, CLASS_HIDE);
     });
+    var zoomedImages = [];
+    var resetBtn = document.querySelector('.js-reset-btn');
+    addClass(resetBtn, CLASS_HIDE);
+    addListener(resetBtn, EVENT_CLICK, function () {
+      addClass(resetBtn, CLASS_HIDE);
+      zoomedImages.forEach(function (img) {
+        img.ratio = 1;
+        setStyle(img, getTransforms({}));
+      });
+      zoomedImages = [];
+    });
     addListener(megaGallery, EVENT_LENTA, function () {
       forEach(_this.images, function (image, index) {
         var src = image.src;
@@ -1277,6 +1288,32 @@ var events = {
 
         if (src || url) {
           var img = document.createElement('img');
+          img.ratio = 1;
+          addListener(img, EVENT_WHEEL, function (event) {
+            if (!event.ctrlKey) {
+              return;
+            }
+
+            removeClass(resetBtn, CLASS_HIDE);
+            var delta = 0;
+
+            if (event.deltaY) {
+              delta = event.deltaY > 0 ? 1 : -1;
+            } else if (event.wheelDelta) {
+              delta = -event.wheelDelta / 120;
+            } else if (event.detail) {
+              delta = event.detail > 0 ? 1 : -1;
+            }
+
+            zoomedImages.push(img);
+            var scale = img.ratio * (1 + -delta * 0.1);
+            scale = scale < 1 ? 1 : scale;
+            img.ratio = scale;
+            setStyle(img, assign({}, getTransforms({
+              scaleX: scale,
+              scaleY: scale
+            })));
+          });
           img.src = src || url;
           img.alt = alt;
           img.setAttribute('data-index', index);
@@ -3066,7 +3103,7 @@ var Viewer = /*#__PURE__*/function () {
       template.innerHTML = TEMPLATE;
       var viewer = template.querySelector(".".concat(NAMESPACE, "-container"));
       var title = viewer.querySelector(".".concat(NAMESPACE, "-title"));
-      var toolbar = viewer.querySelector(".".concat(NAMESPACE, "-toolbar"));
+      var toolbar = viewer.querySelector(".".concat(NAMESPACE, "-js-toolbar"));
       var navbar = viewer.querySelector(".".concat(NAMESPACE, "-navbar"));
       var button = viewer.querySelector(".".concat(NAMESPACE, "-js-button"));
       var canvas = viewer.querySelector(".".concat(NAMESPACE, "-canvas"));
@@ -3255,3 +3292,4 @@ var Viewer = /*#__PURE__*/function () {
 assign(Viewer.prototype, render, events, handlers, methods, others);
 
 export default Viewer;
+//# sourceMappingURL=viewer.esm.js.map
