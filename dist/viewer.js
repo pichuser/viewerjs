@@ -5,7 +5,7 @@
  * Copyright 2015-present Chen Fengyuan
  * Released under the MIT license
  *
- * Date: 2020-11-25T17:42:07.816Z
+ * Date: 2020-11-25T18:43:02.726Z
  */
 
 (function (global, factory) {
@@ -3300,4 +3300,3 @@
   return Viewer;
 
 })));
-//# sourceMappingURL=viewer.js.map

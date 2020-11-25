@@ -5,7 +5,7 @@
  * Copyright 2015-present Chen Fengyuan
  * Released under the MIT license
  *
- * Date: 2020-11-25T17:42:07.816Z
+ * Date: 2020-11-25T18:43:02.726Z
  */
 
 function _typeof(obj) {
@@ -3292,4 +3292,3 @@ var Viewer = /*#__PURE__*/function () {
 assign(Viewer.prototype, render, events, handlers, methods, others);
 
 export default Viewer;
-//# sourceMappingURL=viewer.esm.js.map
