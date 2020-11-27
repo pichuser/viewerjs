@@ -1,10 +1,12 @@
 import {
   CLASS_HIDE,
+  CLASS_LOADING,
   EVENT_CLICK,
   EVENT_DBLCLICK,
   EVENT_DRAG_START,
   EVENT_KEY_DOWN,
   EVENT_LENTA,
+  EVENT_LOAD,
   EVENT_POINTER_DOWN,
   EVENT_POINTER_MOVE,
   EVENT_POINTER_UP,
@@ -16,6 +18,7 @@ import {
   addListener,
   forEach,
   getImageNameFromURL,
+  removeClass,
   removeListener,
 } from './utilities';
 
@@ -39,6 +42,8 @@ export default {
       addClass(megaGallery, CLASS_HIDE);
     });
     addListener(megaGallery, EVENT_LENTA, () => {
+      const loadStatus = [];
+      addClass(megaGallery, CLASS_LOADING);
       forEach(this.images, (image, index) => {
         const { src } = image;
         const alt = image.alt || getImageNameFromURL(src);
@@ -51,9 +56,19 @@ export default {
           img.alt = alt;
           img.setAttribute('data-index', index);
           img.setAttribute('data-original-url', url || src);
+          const promise = new Promise((resolve) => {
+            addListener(img, EVENT_LOAD, () => {
+              resolve();
+            });
+            addListener(img, 'error', () => {
+              resolve();
+            });
+          });
+          loadStatus.push(promise);
           megaGallery.appendChild(img);
         }
       });
+      Promise.all(loadStatus).then(() => removeClass(megaGallery, CLASS_LOADING));
     }, { once: true });
 
     if (options.zoomable && options.zoomOnWheel) {

@@ -446,3 +446,27 @@
   min-width: initial !important;
   object-fit: cover;
 }
+
+.viewer-mega-gallery:not(.viewer-hide).viewer-loading {
+  overflow: hidden;
+  position: relative;
+}
+
+.viewer-mega-gallery:not(.viewer-hide).viewer-loading::before {
+  background-color: rgba(0, 0, 0, 0.5);
+  bottom: 0;
+  content: "hi";
+  left: 0;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.viewer-mega-gallery:not(.viewer-hide).viewer-loading::after {
+  border-width: 2px;
+  height: 20px;
+  margin-left: -10px;
+  margin-top: -10px;
+  width: 20px;
+}

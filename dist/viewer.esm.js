@@ -5,7 +5,7 @@
  * Copyright 2015-present Chen Fengyuan
  * Released under the MIT license
  *
- * Date: 2020-11-23T17:35:41.038Z
+ * Date: 2020-11-27T02:49:10.669Z
  */
 
 function _typeof(obj) {
@@ -1269,6 +1269,8 @@ var events = {
       addClass(megaGallery, CLASS_HIDE);
     });
     addListener(megaGallery, EVENT_LENTA, function () {
+      var loadStatus = [];
+      addClass(megaGallery, CLASS_LOADING);
       forEach(_this.images, function (image, index) {
         var src = image.src;
         var alt = image.alt || getImageNameFromURL(src);
@@ -1281,8 +1283,20 @@ var events = {
           img.alt = alt;
           img.setAttribute('data-index', index);
           img.setAttribute('data-original-url', url || src);
+          var promise = new Promise(function (resolve) {
+            addListener(img, EVENT_LOAD, function () {
+              resolve();
+            });
+            addListener(img, 'error', function () {
+              resolve();
+            });
+          });
+          loadStatus.push(promise);
           megaGallery.appendChild(img);
         }
+      });
+      Promise.all(loadStatus).then(function () {
+        return removeClass(megaGallery, CLASS_LOADING);
       });
     }, {
       once: true
