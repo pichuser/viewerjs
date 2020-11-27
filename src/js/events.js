@@ -16,10 +16,13 @@ import {
 import {
   addClass,
   addListener,
+  assign,
   forEach,
   getImageNameFromURL,
+  getTransforms,
   removeClass,
   removeListener,
+  setStyle,
 } from './utilities';
 
 export default {
@@ -40,6 +43,50 @@ export default {
     addListener(button, EVENT_CLICK, () => {
       this.lentaViewing = false;
       addClass(megaGallery, CLASS_HIDE);
+    });
+    const resetBtn = document.querySelector('.js-reset-btn');
+    const galleryBody = megaGallery.querySelector('.viewer-mega-gallery-body');
+    addClass(resetBtn, CLASS_HIDE);
+    addListener(resetBtn, EVENT_CLICK, () => {
+      addClass(resetBtn, CLASS_HIDE);
+      const { scrollLeft } = megaGallery;
+      setStyle(galleryBody, getTransforms({}));
+      megaGallery.scrollLeft = scrollLeft / galleryBody.ratio;
+      galleryBody.ratio = 1;
+    });
+    galleryBody.ratio = 1;
+    addListener(megaGallery, EVENT_WHEEL, (event) => {
+      if (!event.ctrlKey) {
+        return;
+      }
+      removeClass(resetBtn, CLASS_HIDE);
+      event.preventDefault();
+      let delta = 1;
+      if (event.deltaY) {
+        delta = event.deltaY > 0 ? 1 : -1;
+      } else if (event.wheelDelta) {
+        delta = -event.wheelDelta / 120;
+      } else if (event.detail) {
+        delta = event.detail > 0 ? 1 : -1;
+      }
+      const multiply = 1 - delta * 0.05;
+      let scale = galleryBody.ratio * multiply;
+      scale = scale < 1 ? 1 : scale;
+      galleryBody.ratio = scale;
+      setStyle(galleryBody, assign({
+      }, getTransforms({
+        scaleX: scale,
+        scaleY: scale,
+      })));
+      if (scale !== 1) {
+        megaGallery.scrollLeft *= multiply;
+      }
+      if (scale === 1) {
+        addClass(resetBtn, CLASS_HIDE);
+      }
+    }, {
+      passive: false,
+      capture: true,
     });
     addListener(megaGallery, EVENT_LENTA, () => {
       const loadStatus = [];
@@ -65,7 +112,7 @@ export default {
             });
           });
           loadStatus.push(promise);
-          megaGallery.appendChild(img);
+          galleryBody.appendChild(img);
         }
       });
       Promise.all(loadStatus).then(() => removeClass(megaGallery, CLASS_LOADING));

@@ -5,7 +5,7 @@
  * Copyright 2015-present Chen Fengyuan
  * Released under the MIT license
  *
- * Date: 2020-11-27T02:48:50.697Z
+ * Date: 2020-11-27T08:32:33.221Z
  */
 
 .viewer-zoom-in::before,
@@ -471,20 +471,26 @@
 
 .viewer-mega-gallery:not(.viewer-hide) {
   background-color: beige;
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
   height: 100vh;
   left: 0;
-  overflow-x: scroll;
+  overflow: auto;
   position: fixed;
   top: 0;
-  white-space: nowrap;
   width: 100vw;
   z-index: 1000;
 }
 
-.viewer-mega-gallery:not(.viewer-hide) img {
+.viewer-mega-gallery-body {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  height: 100%;
+  -webkit-transform-origin: 0;
+  transform-origin: 0;
+  white-space: nowrap;
+}
+
+.viewer-mega-gallery img {
   max-height: 100% !important;
   min-width: 0 !important;
   min-width: initial !important;
@@ -492,12 +498,12 @@
   object-fit: cover;
 }
 
-.viewer-mega-gallery:not(.viewer-hide).viewer-loading {
+.viewer-mega-gallery.viewer-loading {
   overflow: hidden;
   position: relative;
 }
 
-.viewer-mega-gallery:not(.viewer-hide).viewer-loading::before {
+.viewer-mega-gallery.viewer-loading::before {
   background-color: rgba(0, 0, 0, 0.5);
   bottom: 0;
   content: "hi";
@@ -508,10 +514,15 @@
   top: 0;
 }
 
-.viewer-mega-gallery:not(.viewer-hide).viewer-loading::after {
+.viewer-mega-gallery.viewer-loading::after {
   border-width: 2px;
   height: 20px;
   margin-left: -10px;
   margin-top: -10px;
   width: 20px;
+}
+
+.viewer-footer-fixed {
+  bottom: 50px;
+  position: fixed;
 }

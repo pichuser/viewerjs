@@ -5,7 +5,7 @@
  * Copyright 2015-present Chen Fengyuan
  * Released under the MIT license
  *
- * Date: 2020-11-27T02:49:10.669Z
+ * Date: 2020-11-27T08:32:36.204Z
  */
 
 (function (global, factory) {
@@ -325,7 +325,7 @@
     stop: null
   };
 
-  var TEMPLATE = '<div class="viewer-container" touch-action="none">' + '<div class="viewer-mega-gallery">' + '<div role="button" class="viewer-fixed viewer-button viewer-close js-close-mega-gallery"></div>' + '</div>' + '<div class="viewer-canvas"></div>' + '<div class="viewer-footer">' + '<div class="viewer-title"></div>' + '<div class="viewer-toolbar"></div>' + '<div class="viewer-navbar">' + '<ul class="viewer-list"></ul>' + '</div>' + '</div>' + '<div class="viewer-tooltip"></div>' + '<div role="button" class="viewer-button viewer-js-button" data-viewer-action="mix"></div>' + '<div class="viewer-player"></div>' + '</div>';
+  var TEMPLATE = '<div class="viewer-container" touch-action="none">' + '<div class="viewer-mega-gallery">' + '<div class="viewer-mega-gallery-body"></div>' + '<div role="button" class="viewer-fixed viewer-button viewer-close js-close-mega-gallery"></div>' + '<div class="viewer-footer viewer-footer-fixed">' + '<div class="viewer-toolbar">' + '<ul>' + '<li class="viewer-with-text viewer-reset-btn js-reset-btn"><span>сбросить</span></li>' + '</ul>' + '</div>' + '</div>' + '</div>' + '<div class="viewer-canvas"></div>' + '<div class="viewer-footer">' + '<div class="viewer-title"></div>' + '<div class="viewer-js-toolbar viewer-toolbar"></div>' + '<div class="viewer-navbar">' + '<ul class="viewer-list"></ul>' + '</div>' + '</div>' + '<div class="viewer-tooltip"></div>' + '<div role="button" class="viewer-button viewer-js-button" data-viewer-action="mix"></div>' + '<div class="viewer-player"></div>' + '</div>';
 
   var IS_BROWSER = typeof window !== 'undefined' && typeof window.document !== 'undefined';
   var WINDOW = IS_BROWSER ? window : {};
@@ -1274,6 +1274,54 @@
         _this.lentaViewing = false;
         addClass(megaGallery, CLASS_HIDE);
       });
+      var resetBtn = document.querySelector('.js-reset-btn');
+      var galleryBody = megaGallery.querySelector('.viewer-mega-gallery-body');
+      addClass(resetBtn, CLASS_HIDE);
+      addListener(resetBtn, EVENT_CLICK, function () {
+        addClass(resetBtn, CLASS_HIDE);
+        var scrollLeft = megaGallery.scrollLeft;
+        setStyle(galleryBody, getTransforms({}));
+        megaGallery.scrollLeft = scrollLeft / galleryBody.ratio;
+        galleryBody.ratio = 1;
+      });
+      galleryBody.ratio = 1;
+      addListener(megaGallery, EVENT_WHEEL, function (event) {
+        if (!event.ctrlKey) {
+          return;
+        }
+
+        removeClass(resetBtn, CLASS_HIDE);
+        event.preventDefault();
+        var delta = 1;
+
+        if (event.deltaY) {
+          delta = event.deltaY > 0 ? 1 : -1;
+        } else if (event.wheelDelta) {
+          delta = -event.wheelDelta / 120;
+        } else if (event.detail) {
+          delta = event.detail > 0 ? 1 : -1;
+        }
+
+        var multiply = 1 - delta * 0.05;
+        var scale = galleryBody.ratio * multiply;
+        scale = scale < 1 ? 1 : scale;
+        galleryBody.ratio = scale;
+        setStyle(galleryBody, assign({}, getTransforms({
+          scaleX: scale,
+          scaleY: scale
+        })));
+
+        if (scale !== 1) {
+          megaGallery.scrollLeft *= multiply;
+        }
+
+        if (scale === 1) {
+          addClass(resetBtn, CLASS_HIDE);
+        }
+      }, {
+        passive: false,
+        capture: true
+      });
       addListener(megaGallery, EVENT_LENTA, function () {
         var loadStatus = [];
         addClass(megaGallery, CLASS_LOADING);
@@ -1298,7 +1346,7 @@
               });
             });
             loadStatus.push(promise);
-            megaGallery.appendChild(img);
+            galleryBody.appendChild(img);
           }
         });
         Promise.all(loadStatus).then(function () {
@@ -3086,7 +3134,7 @@
         template.innerHTML = TEMPLATE;
         var viewer = template.querySelector(".".concat(NAMESPACE, "-container"));
         var title = viewer.querySelector(".".concat(NAMESPACE, "-title"));
-        var toolbar = viewer.querySelector(".".concat(NAMESPACE, "-toolbar"));
+        var toolbar = viewer.querySelector(".".concat(NAMESPACE, "-js-toolbar"));
         var navbar = viewer.querySelector(".".concat(NAMESPACE, "-navbar"));
         var button = viewer.querySelector(".".concat(NAMESPACE, "-js-button"));
         var canvas = viewer.querySelector(".".concat(NAMESPACE, "-canvas"));

@@ -437,17 +437,24 @@
     }
   }
 
-  &-mega-gallery:not(.viewer-hide) {
-    background-color: beige;
-    display: flex;
-    height: 100vh;
-    left: 0;
-    overflow-x: scroll;
-    position: fixed;
-    top: 0;
-    white-space: nowrap;
-    width: 100vw;
-    z-index: 1000;
+  &-mega-gallery {
+    &:not(.viewer-hide) {
+      background-color: beige;
+      height: 100vh;
+      left: 0;
+      overflow: auto;
+      position: fixed;
+      top: 0;
+      width: 100vw;
+      z-index: 1000;
+    }
+
+    &-body {
+      display: flex;
+      height: 100%;
+      transform-origin: 0;
+      white-space: nowrap;
+    }
 
     img {
       max-height: 100% !important;
@@ -478,5 +485,10 @@
         width: 20px;
       }
     }
+  }
+
+  &-footer-fixed {
+    bottom: 50px;
+    position: fixed;
   }
 }
