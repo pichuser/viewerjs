@@ -71,7 +71,7 @@ export default {
       }
       const multiply = 1 - delta * 0.05;
       let scale = galleryBody.ratio * multiply;
-      scale = scale < 1 ? 1 : scale;
+      scale = scale < 0.1 ? 0.1 : scale;
       galleryBody.ratio = scale;
       setStyle(galleryBody, assign({
       }, getTransforms({

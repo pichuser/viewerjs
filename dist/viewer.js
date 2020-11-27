@@ -5,7 +5,7 @@
  * Copyright 2015-present Chen Fengyuan
  * Released under the MIT license
  *
- * Date: 2020-11-27T11:16:57.838Z
+ * Date: 2020-11-27T13:32:53.251Z
  */
 
 (function (global, factory) {
@@ -1304,7 +1304,7 @@
 
         var multiply = 1 - delta * 0.05;
         var scale = galleryBody.ratio * multiply;
-        scale = scale < 1 ? 1 : scale;
+        scale = scale < 0.1 ? 0.1 : scale;
         galleryBody.ratio = scale;
         setStyle(galleryBody, assign({}, getTransforms({
           scaleX: scale,
