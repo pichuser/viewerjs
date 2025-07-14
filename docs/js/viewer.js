@@ -1,11 +1,11 @@
 /*!
- * Viewer.js v1.7.1
+ * Viewer.js v1.7.2
  * https://fengyuanchen.github.io/viewerjs
  *
  * Copyright 2015-present Chen Fengyuan
  * Released under the MIT license
  *
- * Date: 2025-07-14T14:07:58.336Z
+ * Date: 2025-07-14T14:26:16.276Z
  */
 
 (function (global, factory) {
