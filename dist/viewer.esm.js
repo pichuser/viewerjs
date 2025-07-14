@@ -5,7 +5,7 @@
  * Copyright 2015-present Chen Fengyuan
  * Released under the MIT license
  *
- * Date: 2020-11-27T13:32:53.251Z
+ * Date: 2025-07-14T10:06:07.744Z
  */
 
 function _typeof(obj) {
@@ -3196,6 +3196,14 @@ var Viewer = /*#__PURE__*/function () {
             text.innerText = 'лента';
             item.classList.add("".concat(NAMESPACE, "-with-text"));
             item.appendChild(text);
+          }
+
+          if (name === 'okf') {
+            var _text = document.createElement('span');
+
+            _text.innerText = 'ОКФ';
+            item.classList.add("".concat(NAMESPACE, "-with-text"));
+            item.appendChild(_text);
           }
 
           if (!isFunction(click)) {
