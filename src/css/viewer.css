@@ -257,6 +257,10 @@
   width: auto;
 }
 
+.viewer-toolbar > ul > li.viewer-with-text::marker {
+  font-size: 0;
+}
+
 .viewer-toolbar > ul > li.viewer-with-text span {
   pointer-events: none;
 }

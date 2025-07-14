@@ -20,6 +20,7 @@ declare namespace Viewer {
   }
 
   export interface ToolbarOptions {
+    okf: boolean | Visibility | ToolbarButtonSize | Function | ToolbarButtonOptions;
     lenta: boolean;
     flipHorizontal?: boolean | Visibility | ToolbarButtonSize | Function | ToolbarButtonOptions;
     flipVertical?: boolean | Visibility | ToolbarButtonSize | Function | ToolbarButtonOptions;
