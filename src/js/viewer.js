@@ -255,6 +255,13 @@ class Viewer {
           item.appendChild(text);
         }
 
+        if (name === 'okf') {
+          const text = document.createElement('span');
+          text.innerText = 'ОКФ';
+          item.classList.add(`${NAMESPACE}-with-text`);
+          item.appendChild(text);
+        }
+
         if (!isFunction(click)) {
           setData(item, DATA_ACTION, name);
         }
