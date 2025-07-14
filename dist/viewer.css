@@ -5,7 +5,7 @@
  * Copyright 2015-present Chen Fengyuan
  * Released under the MIT license
  *
- * Date: 2025-07-14T10:06:03.852Z
+ * Date: 2025-07-14T14:07:30.113Z
  */
 
 .viewer-zoom-in::before,
@@ -277,6 +277,10 @@
   overflow: visible;
   padding: 0 10px;
   width: auto;
+}
+
+.viewer-toolbar > ul > li.viewer-with-text::marker {
+  font-size: 0;
 }
 
 .viewer-toolbar > ul > li.viewer-with-text span {
