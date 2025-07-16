@@ -86,7 +86,6 @@ declare namespace Viewer {
     transition?: boolean;
     url?: string | Function;
     view?(event: CustomEvent): void;
-    lenta(): void;
     viewed?(event: CustomEvent): void;
     zIndex?: number;
     zIndexInline?: number;
