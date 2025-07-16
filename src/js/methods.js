@@ -21,6 +21,7 @@ import {
   EVENT_PLAY,
   EVENT_STOP,
   NAMESPACE,
+  EVENT_LENTA,
 } from './constants';
 import {
   addClass,
@@ -628,6 +629,13 @@ export default {
       }
     }
 
+    return this;
+  },
+
+  lenta() {
+    this.lentaViewing = true;
+    dispatchEvent(this.megaGallery, EVENT_LENTA);
+    removeClass(this.megaGallery, CLASS_HIDE);
     return this;
   },
 

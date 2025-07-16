@@ -21,7 +21,7 @@ declare namespace Viewer {
 
   export interface ToolbarOptions {
     okf: boolean | Visibility | ToolbarButtonSize | Function | ToolbarButtonOptions;
-    lenta: boolean;
+    lenta: boolean | Visibility | ToolbarButtonSize | Function | ToolbarButtonOptions;
     flipHorizontal?: boolean | Visibility | ToolbarButtonSize | Function | ToolbarButtonOptions;
     flipVertical?: boolean | Visibility | ToolbarButtonSize | Function | ToolbarButtonOptions;
     next?: boolean | Visibility | ToolbarButtonSize | Function | ToolbarButtonOptions;
@@ -86,6 +86,7 @@ declare namespace Viewer {
     transition?: boolean;
     url?: string | Function;
     view?(event: CustomEvent): void;
+    lenta(): void;
     viewed?(event: CustomEvent): void;
     zIndex?: number;
     zIndexInline?: number;
@@ -123,6 +124,7 @@ declare class Viewer {
   view(index?: number): Viewer;
   zoom(ratio: number, hasTooltip?: boolean): Viewer;
   zoomTo(ratio: number, hasTooltip?: boolean): Viewer;
+  lenta(): Viewer;
   static noConflict(): Viewer;
   static setDefaults(options: Viewer.Options): void;
 }
