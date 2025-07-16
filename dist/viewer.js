@@ -5,7 +5,7 @@
  * Copyright 2015-present Chen Fengyuan
  * Released under the MIT license
  *
- * Date: 2025-07-14T14:26:16.276Z
+ * Date: 2025-07-16T13:12:53.354Z
  */
 
 (function (global, factory) {
@@ -1397,8 +1397,7 @@
     click: function click(event) {
       var target = event.target;
       var options = this.options,
-          imageData = this.imageData,
-          megaGallery = this.megaGallery;
+          imageData = this.imageData;
       var action = getData(target, DATA_ACTION); // Cancel the emulated click when the native click event was triggered.
 
       if (IS_TOUCH_DEVICE && event.isTrusted && target === this.canvas) {
@@ -1426,9 +1425,7 @@
           break;
 
         case 'lenta':
-          this.lentaViewing = true;
-          dispatchEvent(megaGallery, EVENT_LENTA);
-          removeClass(megaGallery, CLASS_HIDE);
+          this.lenta();
           break;
 
         case 'view':
@@ -2415,6 +2412,12 @@
         }
       }
 
+      return this;
+    },
+    lenta: function lenta() {
+      this.lentaViewing = true;
+      dispatchEvent(this.megaGallery, EVENT_LENTA);
+      removeClass(this.megaGallery, CLASS_HIDE);
       return this;
     },
 
